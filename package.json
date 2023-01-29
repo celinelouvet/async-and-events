@@ -1,0 +1,14 @@
+{
+  "name": "async-and-events",
+  "version": "0.0.1",
+  "license": "MIT",
+  "description": "Contenu présentation asynchrone & events",
+  "repository": "git@github.com:celinelouvet/async-and-events.git",
+  "author": "Céline Louvet <celine.louvet@gmail.com>",
+  "scripts": {
+    "generate": "mmdc -i src/graphs.md -o output.svg"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^9.3.0"
+  }
+}
