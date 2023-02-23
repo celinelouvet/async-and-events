@@ -2,25 +2,25 @@
 
 ## 1. Qu'est ce que ça veut dire ?
 
-Un service `Service 1` appelle un 2ème service `Service 2`. Il va attendre le résultat pour la suite de son traitement.
+Un service `S1` appelle un 2ème service `S2`. Il va attendre le résultat pour la suite de son traitement.
 
 ```mermaid
 ---
 title: Appel synchrone
 ---
 sequenceDiagram
-    participant S1 as Service 1
-    participant S2 as Service 2
+    participant S1
+    participant S2
 
     activate S1
-    Note right of S1: Début du traitement<br/>du Service 1
+    Note right of S1: Début du traitement<br/>de S1
     S1->>S2: Récupérer une info ?
     activate S2
-    Note over S1,S2: En attente de Service 2
+    Note over S1,S2: En attente de S2
     S2->>S1: Info
     deactivate S2
 
-    Note right of S1: Suite du traitement<br/>du Service 1
+    Note right of S1: Suite du traitement<br/>de S1
     deactivate S1
 ```
 
@@ -32,14 +32,14 @@ sequenceDiagram
 ### Avantages
 
 - Le résultat obtenu est à jour.
-- On a la garantie que le traitement de `Service 2` s'est correctement effectué.
+- On a la garantie que le traitement de `S2` s'est correctement effectué.
 
 ### Inconvénients
 
-- Le traitement de `Service 1` est en pause le temps que `Service 2` réponde.
+- Le traitement de `S1` est en pause le temps que `S2` réponde.
 - Gestion des erreurs si :
-  - `Service 2` est down
-  - `Service 2` est trop long (timeout)
+  - `S2` est down
+  - `S2` est trop long (timeout)
 
 ## 2. Dans notre situation réelle
 

@@ -1,4 +1,4 @@
-# 1. Cas existant
+# 1. Cas réel
 
 On va prendre un cas réel qu'on va améliorer au fil des points couverts. Il s'agira d'une application de gestion des photos.
 
@@ -13,11 +13,11 @@ graph TB
     G --> F2(Filiale 2<br/>SI 2)
 ```
 
-- `SI 1`:
-  - appartient à une filiale d'un groupe
-  - SI d'une taille assez conséquente avec plusieurs services qui intéragissent
-- `SI 2`:
-  - appartient à une autre filiale du groupe.
+On va considérer un groupe qui a plusieurs filiales, dont `Filiale 1` et `Filiale 2`. Chacune de ces filiales a son
+propre SI. Le SI de la `Filiale 1` appelle celui de la `Filiale 2`.
+
+On va surtout se concentrer sur le SI de la `Filiale 1`, qui est d'une taille assez conséquente avec notamment plusieurs
+services qui interagissent.
 
 ## 2. En détails
 
@@ -42,10 +42,12 @@ graph LR
     US --> SMS
 ```
 
-- `Users` centralise les informations liées à l'identité de l'utilisateur (id, email, nom, prénom etc).
+Tous les services de `SI1` n'ont pas été représentés.
+
 - `Contracts` centralise les informations liées au contrat de l'utilisateur et options qu'il a souscrit.
 - `Photos` gère tout ce qui est relatif aux photos de l'utilisateur.
+- `Users` centralise les informations liées à l'identité de l'utilisateur (id, email, nom, prénom etc).
+  - il est appelé par quasiment tous les services du `SI 1` => c'est un SPOF.
+  - il a des rôles divers, autres que centraliser tout ce qui est lié à l'identité de l'utilisateur (envoyer des mails).
 
-La plupart de ces services dispose de sa propre base de données.
-
-_A noter:_ `Users` est appelé par quasiment tous les services du `SI 1`, services qui n'ont pas tous été representés.
+La plupart de ces services dispose de leur propre base de données.
