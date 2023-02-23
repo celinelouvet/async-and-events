@@ -6,7 +6,7 @@
   "repository": "git@github.com:celinelouvet/async-and-events.git",
   "author": "Céline Louvet <celine.louvet@gmail.com>",
   "scripts": {
-    "generate": "mmdc -i src/*.md -o output/graphs.svg"
+    "generate": "exec ./generate.sh"
   },
   "dependencies": {
     "@mermaid-js/mermaid-cli": "^9.3.0"
