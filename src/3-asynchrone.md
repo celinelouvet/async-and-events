@@ -46,7 +46,7 @@ L'utilisateur veut, via son application mobile, partager une photo par email à 
 
 Photos de [Pixabay](https://pixabay.com)
 
-### 1ère version
+### Proposition
 
 On pourrait le faire en synchrone.
 
@@ -61,29 +61,34 @@ sequenceDiagram
     participant Email as Service tiers Email
 
 
-    AM->>PS: Confirme l'envoi
+    AM-)PS: Confirme l'envoi
     activate PS
-    PS->>US: Envoyer l'email ?
+    PS-)US: Envoyer l'email ?
     activate US
 
-    US->>Email: Envoyer l'email
+    US-)Email: Envoyer l'email
     activate Email
-    Email->>US: Email envoyé
+    Email-)US: Email envoyé
     deactivate Email
 
-    US->>PS: Email envoyé
+    US-)PS: Email envoyé
     deactivate US
 
-    PS->>AM: Afficher "Email envoyé"
+    PS-)AM: Afficher "Email envoyé"
     deactivate PS
 ```
 
 #### Les questions qu'on peut se poser
 
-- est ce qu'il est utile d'attendre la confirmation d'envoi ?
-- qu'est ce qui se passe si `Users` est down ou surchargé ?
+1. est ce qu'il est utile d'attendre la confirmation d'envoi ?
+2. pourquoi `Users` envoie-t'il les emails ?
+3. qu'est ce qui se passe si `Users` est down ou surchargé ? Ce qui peut arriver encore plus rapidement si `Users` centralise
+   beaucoup trop de logique diverse.
 
-### Amélioration
+### 1ère amélioration
+
+On va d'abord extraire de `Users` la logique associée à l'envoi de notifications et la mettre dans un service `Notifications`.
+Ça incluera l'envoi d'email et de SMS.
 
 ```mermaid
 ---
@@ -92,28 +97,77 @@ title: Cas réel - Envoi d'email
 sequenceDiagram
     actor AM as Application mobile
     participant PS as Photos
+    participant NS as Notifications
     participant US as Users
     participant Email as Service tiers Email
 
 
-    AM->>PS: Confirme l'envoi
+    AM-)PS: Confirme l'envoi
     activate PS
-    PS-->>US: Envoyer l'email
+    PS-)NS: Envoyer l'email
+    activate NS
+    NS-)US: Récupérer l'adresse email de l'utilisateur
     activate US
-    PS->>AM: Afficher "Email envoyé"
-    deactivate PS
-
-    US->>Email: Envoyer l'email
-    activate Email
-    Email->>US: Email envoyé
-    deactivate Email
+    US-)NS: Adresse email
     deactivate US
+
+    NS-)Email: Envoyer l'email
+    activate Email
+    Email-)NS: Email envoyé
+    deactivate Email
+
+    NS-)PS: Email envoyé
+    deactivate NS
+
+    PS-)AM: Afficher "Email envoyé"
+    deactivate PS
 ```
-
-#### Qu'est ce que ça change
-
-`Photos` n'attend plus la confirmation d'envoi de l'email
 
 #### Les défauts
 
-D'un point de vue `Photos`, on n'est pas sûr que l'email ait vraiment été envoyé. Donc on va encore améliorer ça.
+1. on attend toujours le résultat de l'envoi pour pouvoir poursuivre le traitement de `Photos`.
+2. on a créé `Notifications` qui est devenu un point central d'envoi de notification. Bloquer le traitement de `Notifications`
+   va être génant pour les autres service qui souhaiteraient envoyer des notifications, en même temps.
+
+### 2ème amélioration
+
+On va déclencher l'appel à `Notifications` de manière asynchrone. Ça permettra d'éviter que `Photos` attende le résultat
+de l'envoi de l'email.
+
+```mermaid
+---
+title: Cas réel - Envoi d'email
+---
+sequenceDiagram
+    actor AM as Application mobile
+    participant PS as Photos
+    participant NS as Notifications
+    participant US as Users
+    participant Email as Service tiers Email
+
+
+    AM-)PS: Confirme l'envoi
+    activate PS
+    PS--)NS: Envoyer l'email
+    activate NS
+    PS-)AM: Afficher "Email envoyé"
+    deactivate PS
+
+    NS-)US: Récupérer l'adresse email de l'utilisateur
+    activate US
+    US-)NS: Adresse email
+    deactivate US
+
+    NS-)Email: Envoyer l'email
+    activate Email
+    Email-)NS: Email envoyé
+    deactivate Email
+
+
+    deactivate NS
+```
+
+#### Les défauts
+
+1. d'un point de vue `Photos`, on n'est pas sûr que l'email ait vraiment été envoyé. Donc on va encore améliorer ça.
+2. `Notifications` est trop central. En cas d'erreur ou de surcharge, on n'a plus aucun envoi de notifications.
